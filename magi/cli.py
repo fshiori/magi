@@ -136,5 +136,38 @@ def presets():
         click.echo(f"  {name:15s} {names}")
 
 
+@main.command()
+@click.option("--dataset", default="builtin", help="Dataset to benchmark against")
+@click.option("--mode", default="vote", type=click.Choice(["vote", "critique", "adaptive"]))
+@click.option("--concurrency", default=3, help="Max concurrent questions")
+@click.option("--melchior", default="claude-sonnet-4-6", help="Model for Melchior node")
+@click.option("--balthasar", default="gpt-4o", help="Model for Balthasar node")
+@click.option("--casper", default="gemini/gemini-2.5-pro", help="Model for Casper node")
+def bench(dataset: str, mode: str, concurrency: int, melchior: str, balthasar: str, casper: str):
+    """Run benchmark: MAGI vs individual models on multiple-choice questions."""
+    from magi.bench.datasets import get_dataset
+    from magi.bench.runner import run_benchmark
+    from magi.bench.report import format_report
+
+    try:
+        questions = get_dataset(dataset)
+    except ValueError as e:
+        click.echo(str(e), err=True)
+        sys.exit(1)
+
+    engine = MAGI(melchior=melchior, balthasar=balthasar, casper=casper)
+    click.echo(f"Running benchmark: {len(questions)} questions, mode={mode}, concurrency={concurrency}")
+    click.echo(f"Models: {melchior} / {balthasar} / {casper}")
+    click.echo("")
+
+    try:
+        report = asyncio.run(run_benchmark(engine, questions, mode=mode, concurrency=concurrency))
+    except Exception as e:
+        click.echo(f"Benchmark failed: {e}", err=True)
+        sys.exit(1)
+
+    click.echo(format_report(report))
+
+
 if __name__ == "__main__":
     main()
