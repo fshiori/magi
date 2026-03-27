@@ -2,6 +2,7 @@ from magi.core.node import MagiNode, Persona, MELCHIOR, BALTHASAR, CASPER
 from magi.core.decision import Decision
 from magi.protocols.vote import vote
 from magi.protocols.critique import critique
+from magi.protocols.adaptive import adaptive
 from magi.trace.logger import TraceLogger
 import os
 
@@ -52,6 +53,8 @@ class MAGI:
             decision = await critique(query, self.nodes)
         elif mode == "escalate":
             decision = await critique(query, self.nodes, max_rounds=2)
+        elif mode == "adaptive":
+            decision = await adaptive(query, self.nodes)
         else:
             raise NotImplementedError(f"Mode '{mode}' not yet implemented.")
 
