@@ -1,6 +1,7 @@
 from magi.core.node import MagiNode, Persona, MELCHIOR, BALTHASAR, CASPER
 from magi.core.decision import Decision
 from magi.protocols.vote import vote
+from magi.protocols.critique import critique
 from magi.trace.logger import TraceLogger
 import os
 
@@ -44,9 +45,15 @@ class MAGI:
         """
         if mode == "vote":
             decision = await vote(query, self.nodes)
+            # 3-way split with no majority → auto-escalate to critique
+            if decision.protocol_used == "vote_no_majority":
+                decision = await critique(query, self.nodes)
+        elif mode == "critique":
+            decision = await critique(query, self.nodes)
+        elif mode == "escalate":
+            decision = await critique(query, self.nodes, max_rounds=2)
         else:
-            # Future: critique, adaptive, escalate
-            raise NotImplementedError(f"Mode '{mode}' not yet implemented. Use 'vote'.")
+            raise NotImplementedError(f"Mode '{mode}' not yet implemented.")
 
         self._logger.log(decision)
         return decision
