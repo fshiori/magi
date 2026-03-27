@@ -169,5 +169,42 @@ def bench(dataset: str, mode: str, concurrency: int, melchior: str, balthasar: s
     click.echo(format_report(report))
 
 
+@main.command()
+@click.option("--trace-dir", default=None, help="Trace directory (default: ~/.magi/traces)")
+def analytics(trace_dir: str | None):
+    """Analyze decision history from traces."""
+    import os
+    from magi.commands.analytics import load_traces, analyze, format_analytics
+
+    trace_dir = trace_dir or os.path.expanduser("~/.magi/traces")
+    traces = load_traces(trace_dir)
+    report = analyze(traces)
+    click.echo(format_analytics(report))
+
+
+@main.command()
+@click.argument("trace_id")
+@click.option("--trace-dir", default=None, help="Trace directory (default: ~/.magi/traces)")
+def replay(trace_id: str, trace_dir: str | None):
+    """Replay a specific decision by trace ID."""
+    import os
+    from magi.commands.analytics import load_traces, format_replay
+
+    trace_dir = trace_dir or os.path.expanduser("~/.magi/traces")
+    traces = load_traces(trace_dir)
+
+    match = [t for t in traces if t.get("trace_id", "").startswith(trace_id)]
+    if not match:
+        click.echo(f"No decision found with trace ID starting with '{trace_id}'", err=True)
+        sys.exit(1)
+    if len(match) > 1:
+        click.echo(f"Multiple matches for '{trace_id}'. Be more specific.", err=True)
+        for t in match:
+            click.echo(f"  {t['trace_id']} — {t.get('query', 'N/A')[:60]}", err=True)
+        sys.exit(1)
+
+    click.echo(format_replay(match[0]))
+
+
 if __name__ == "__main__":
     main()
