@@ -102,5 +102,30 @@ def diff(file: str | None, staged: bool, melchior: str, balthasar: str, casper: 
     click.echo(format_review_output(decision))
 
 
+@main.command()
+@click.option("--question", "-q", required=True, help="The question that was asked")
+@click.option("--answer", "-a", required=True, help="The answer to evaluate")
+@click.option("--melchior", default="claude-sonnet-4-6", help="Model for Melchior node")
+@click.option("--balthasar", default="gpt-4o", help="Model for Balthasar node")
+@click.option("--casper", default="gemini/gemini-2.5-pro", help="Model for Casper node")
+def judge(question: str, answer: str, melchior: str, balthasar: str, casper: str):
+    """Multi-model answer scoring. Three models rate a Q&A pair."""
+    from magi.commands.judge import build_judge_prompt, format_judge_output
+
+    engine = MAGI(melchior=melchior, balthasar=balthasar, casper=casper)
+    prompt = build_judge_prompt(question, answer)
+
+    try:
+        decision = asyncio.run(engine.ask(prompt, mode="vote"))
+    except AuthenticationError as e:
+        click.echo(f"Authentication error: {e}", err=True)
+        sys.exit(1)
+    except RuntimeError as e:
+        click.echo(f"Error: {e}", err=True)
+        sys.exit(1)
+
+    click.echo(format_judge_output(decision))
+
+
 if __name__ == "__main__":
     main()
