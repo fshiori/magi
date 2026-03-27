@@ -174,11 +174,10 @@ def bench(dataset: str, mode: str, concurrency: int, melchior: str, balthasar: s
 def analytics(trace_dir: str | None):
     """Analyze decision history from traces."""
     import os
-    from magi.commands.analytics import load_traces, analyze, format_analytics
+    from magi.commands.analytics import analyze_stream, format_analytics
 
     trace_dir = trace_dir or os.path.expanduser("~/.magi/traces")
-    traces = load_traces(trace_dir)
-    report = analyze(traces)
+    report = analyze_stream(trace_dir)
     click.echo(format_analytics(report))
 
 
