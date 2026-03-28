@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAGI SYSTEM — NERV Command Center</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap');
+
+  :root {
+    --nerv-red: #cc0000;
+    --nerv-orange: #ff6600;
+    --nerv-yellow: #ffcc00;
+    --nerv-green: #00cc66;
+    --nerv-blue: #0066cc;
+    --nerv-cyan: #00cccc;
+    --bg-dark: #0a0a0f;
+    --bg-panel: #0d0d15;
+    --bg-card: #12121f;
+    --border: #1a1a2e;
+    --text: #c0c0d0;
+    --text-dim: #606080;
+    --text-bright: #e0e0f0;
+    --melchior: #ff4444;
+    --balthasar: #44aaff;
+    --casper: #44ff88;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-dark);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* === HEADER === */
+  .header {
+    background: linear-gradient(180deg, #1a0a0a 0%, var(--bg-dark) 100%);
+    border-bottom: 1px solid var(--nerv-red);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .nerv-logo {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--nerv-red);
+    letter-spacing: 4px;
+    opacity: 0.8;
+  }
+
+  .magi-title {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--text-bright);
+    letter-spacing: 3px;
+  }
+
+  .header-status {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-align: right;
+  }
+
+  .status-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-right: 4px;
+    background: var(--nerv-green);
+    animation: pulse 2s infinite;
+  }
+
+  .status-dot.error { background: var(--nerv-red); }
+  .status-dot.working { background: var(--nerv-orange); animation: pulse 0.5s infinite; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* === INPUT AREA === */
+  .input-area {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+  }
+
+  .input-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .input-group label {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .input-area textarea {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-bright);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    padding: 10px;
+    border-radius: 2px;
+    resize: vertical;
+    min-height: 60px;
+  }
+
+  .input-area textarea:focus {
+    outline: none;
+    border-color: var(--nerv-orange);
+  }
+
+  .input-area select, .input-area input {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    padding: 8px;
+    border-radius: 2px;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 12px;
+  }
+
+  .btn-execute {
+    background: var(--nerv-red);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    cursor: pointer;
+    border-radius: 2px;
+    min-width: 140px;
+    transition: all 0.2s;
+  }
+
+  .btn-execute:hover { background: #ee2222; }
+  .btn-execute:disabled { background: #333; color: #666; cursor: not-allowed; }
+  .btn-execute.running { background: var(--nerv-orange); animation: pulse 1s infinite; }
+
+  /* === MAGI NODES === */
+  .nodes-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2px;
+    padding: 2px;
+    flex: 1;
+    min-height: 300px;
+  }
+
+  .node {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .node-header {
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .node-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+  }
+
+  .node.melchior .node-name { color: var(--melchior); }
+  .node.balthasar .node-name { color: var(--balthasar); }
+  .node.casper .node-name { color: var(--casper); }
+
+  .node.melchior { border-top: 2px solid var(--melchior); }
+  .node.balthasar { border-top: 2px solid var(--balthasar); }
+  .node.casper { border-top: 2px solid var(--casper); }
+
+  .node-meta {
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  .node-status {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .node-status.idle { color: var(--text-dim); }
+  .node-status.thinking { color: var(--nerv-orange); background: rgba(255,102,0,0.1); }
+  .node-status.done { color: var(--nerv-green); background: rgba(0,204,102,0.1); }
+  .node-status.error { color: var(--nerv-red); background: rgba(204,0,0,0.1); }
+  .node-status.critiquing { color: var(--nerv-cyan); background: rgba(0,204,204,0.1); }
+
+  .node-content {
+    flex: 1;
+    padding: 12px;
+    overflow-y: auto;
+    font-size: 12px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--text);
+  }
+
+  .node-content.empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+    font-size: 11px;
+  }
+
+  .node-footer {
+    padding: 6px 12px;
+    border-top: 1px solid var(--border);
+    font-size: 10px;
+    color: var(--text-dim);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* === DECISION PANEL === */
+  .decision-panel {
+    border-top: 2px solid var(--nerv-orange);
+    background: var(--bg-panel);
+    padding: 16px 24px;
+  }
+
+  .decision-panel.hidden { display: none; }
+
+  .decision-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .decision-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    color: var(--nerv-orange);
+    letter-spacing: 2px;
+  }
+
+  .decision-meta {
+    display: flex;
+    gap: 24px;
+    font-size: 12px;
+  }
+
+  .metric {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .metric-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .metric-value.high { color: var(--nerv-green); }
+  .metric-value.medium { color: var(--nerv-yellow); }
+  .metric-value.low { color: var(--nerv-red); }
+
+  .metric-label {
+    font-size: 9px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .ruling-text {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--nerv-orange);
+    padding: 12px;
+    font-size: 13px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .minority-section {
+    margin-top: 12px;
+  }
+
+  .minority-label {
+    font-size: 10px;
+    color: var(--nerv-red);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+
+  .minority-text {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--nerv-red);
+    padding: 12px;
+    font-size: 12px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    max-height: 200px;
+    overflow-y: auto;
+    color: var(--text-dim);
+  }
+
+  /* === PROGRESS BAR === */
+  .progress-bar {
+    height: 2px;
+    background: var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .progress-bar.active::after {
+    content: '';
+    position: absolute;
+    left: -30%;
+    width: 30%;
+    height: 100%;
+    background: var(--nerv-orange);
+    animation: progress-slide 1.5s infinite;
+  }
+
+  @keyframes progress-slide {
+    0% { left: -30%; }
+    100% { left: 100%; }
+  }
+
+  /* === CRITIQUE INDICATOR === */
+  .critique-bar {
+    padding: 6px 24px;
+    background: rgba(0, 204, 204, 0.05);
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--nerv-cyan);
+    display: none;
+  }
+
+  .critique-bar.visible { display: flex; gap: 16px; align-items: center; }
+
+  /* === SCANLINES === */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.03) 2px,
+      rgba(0, 0, 0, 0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .nodes-container { grid-template-columns: 1fr; }
+    .input-row { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <span class="nerv-logo">NERV</span>
+    <span class="magi-title">MAGI SYSTEM</span>
+  </div>
+  <div class="header-status">
+    <span class="status-dot" id="statusDot"></span>
+    <span id="statusText">STANDBY</span>
+  </div>
+</div>
+
+<div class="input-area">
+  <div class="input-group" style="flex:3">
+    <label>Query</label>
+    <textarea id="queryInput" placeholder="Enter your question for the MAGI system..." rows="2">What are the key tradeoffs between microservices and monolithic architecture?</textarea>
+  </div>
+  <div class="input-group" style="flex:0.5">
+    <label>Mode</label>
+    <select id="modeSelect">
+      <option value="adaptive">Adaptive</option>
+      <option value="vote">Vote</option>
+      <option value="critique">Critique</option>
+      <option value="escalate">Escalate</option>
+    </select>
+  </div>
+  <div class="input-group" style="flex:0.5">
+    <label>Preset</label>
+    <select id="presetSelect">
+      <option value="eva">EVA</option>
+      <option value="code-review">Code Review</option>
+      <option value="research">Research</option>
+      <option value="strategy">Strategy</option>
+      <option value="writing">Writing</option>
+    </select>
+  </div>
+  <button class="btn-execute" id="executeBtn" onclick="execute()">EXECUTE</button>
+</div>
+
+<div class="progress-bar" id="progressBar"></div>
+<div class="critique-bar" id="critiqueBar">
+  <span>CRITIQUE ROUND: <strong id="critiqueRound">1</strong></span>
+  <span>AGREEMENT: <strong id="critiqueAgreement">—</strong></span>
+</div>
+
+<div class="nodes-container">
+  <div class="node melchior" id="node-melchior">
+    <div class="node-header">
+      <span class="node-name">MELCHIOR</span>
+      <span class="node-status idle" id="status-melchior">IDLE</span>
+    </div>
+    <div class="node-meta" style="padding: 4px 12px; font-size: 10px; color: var(--text-dim)">
+      <span id="persona-melchior">Analytical Scientist</span>
+    </div>
+    <div class="node-content empty" id="content-melchior">AWAITING QUERY</div>
+    <div class="node-footer">
+      <span id="model-melchior">—</span>
+      <span id="latency-melchior">—</span>
+    </div>
+  </div>
+
+  <div class="node balthasar" id="node-balthasar">
+    <div class="node-header">
+      <span class="node-name">BALTHASAR</span>
+      <span class="node-status idle" id="status-balthasar">IDLE</span>
+    </div>
+    <div class="node-meta" style="padding: 4px 12px; font-size: 10px; color: var(--text-dim)">
+      <span id="persona-balthasar">Empathetic Caregiver</span>
+    </div>
+    <div class="node-content empty" id="content-balthasar">AWAITING QUERY</div>
+    <div class="node-footer">
+      <span id="model-balthasar">—</span>
+      <span id="latency-balthasar">—</span>
+    </div>
+  </div>
+
+  <div class="node casper" id="node-casper">
+    <div class="node-header">
+      <span class="node-name">CASPER</span>
+      <span class="node-status idle" id="status-casper">IDLE</span>
+    </div>
+    <div class="node-meta" style="padding: 4px 12px; font-size: 10px; color: var(--text-dim)">
+      <span id="persona-casper">Pragmatic Realist</span>
+    </div>
+    <div class="node-content empty" id="content-casper">AWAITING QUERY</div>
+    <div class="node-footer">
+      <span id="model-casper">—</span>
+      <span id="latency-casper">—</span>
+    </div>
+  </div>
+</div>
+
+<div class="decision-panel hidden" id="decisionPanel">
+  <div class="decision-header">
+    <span class="decision-title">MAGI DECISION</span>
+    <div class="decision-meta">
+      <div class="metric">
+        <span class="metric-value" id="confidenceValue">—</span>
+        <span class="metric-label">Confidence</span>
+      </div>
+      <div class="metric">
+        <span class="metric-value" id="protocolValue" style="font-size:14px; color:var(--text)">—</span>
+        <span class="metric-label">Protocol</span>
+      </div>
+      <div class="metric">
+        <span class="metric-value" id="latencyValue" style="font-size:14px; color:var(--text)">—</span>
+        <span class="metric-label">Latency</span>
+      </div>
+    </div>
+  </div>
+  <div class="ruling-text" id="rulingText"></div>
+  <div class="minority-section" id="minoritySection" style="display:none">
+    <div class="minority-label">Minority Report</div>
+    <div class="minority-text" id="minorityText"></div>
+  </div>
+</div>
+
+<script>
+const WS_URL = `ws://${location.host}/ws/ask`;
+
+function setNodeStatus(node, status, text) {
+  const el = document.getElementById(`status-${node}`);
+  el.className = `node-status ${status}`;
+  el.textContent = text || status.toUpperCase();
+}
+
+function setNodeContent(node, text) {
+  const el = document.getElementById(`content-${node}`);
+  el.className = 'node-content';
+  el.textContent = text;
+}
+
+function setStatus(status, text) {
+  document.getElementById('statusDot').className = `status-dot ${status}`;
+  document.getElementById('statusText').textContent = text;
+}
+
+function resetUI() {
+  ['melchior', 'balthasar', 'casper'].forEach(n => {
+    setNodeStatus(n, 'idle', 'IDLE');
+    const el = document.getElementById(`content-${n}`);
+    el.className = 'node-content empty';
+    el.textContent = 'AWAITING QUERY';
+    document.getElementById(`latency-${n}`).textContent = '—';
+    document.getElementById(`model-${n}`).textContent = '—';
+  });
+  document.getElementById('decisionPanel').classList.add('hidden');
+  document.getElementById('minoritySection').style.display = 'none';
+  document.getElementById('critiqueBar').classList.remove('visible');
+  document.getElementById('progressBar').classList.remove('active');
+}
+
+function execute() {
+  const query = document.getElementById('queryInput').value.trim();
+  if (!query) return;
+
+  const btn = document.getElementById('executeBtn');
+  btn.disabled = true;
+  btn.classList.add('running');
+  btn.textContent = 'PROCESSING';
+
+  resetUI();
+  setStatus('working', 'CONNECTING');
+  document.getElementById('progressBar').classList.add('active');
+
+  const ws = new WebSocket(WS_URL);
+
+  ws.onopen = () => {
+    setStatus('working', 'TRANSMITTING');
+    ws.send(JSON.stringify({
+      query: query,
+      mode: document.getElementById('modeSelect').value,
+      preset: document.getElementById('presetSelect').value,
+    }));
+  };
+
+  ws.onmessage = (e) => {
+    const data = JSON.parse(e.data);
+    handleEvent(data);
+  };
+
+  ws.onclose = () => {
+    btn.disabled = false;
+    btn.classList.remove('running');
+    btn.textContent = 'EXECUTE';
+    document.getElementById('progressBar').classList.remove('active');
+  };
+
+  ws.onerror = () => {
+    setStatus('error', 'CONNECTION FAILED');
+    btn.disabled = false;
+    btn.classList.remove('running');
+    btn.textContent = 'EXECUTE';
+  };
+}
+
+function handleEvent(data) {
+  switch (data.event) {
+    case 'start':
+      setStatus('working', 'QUERYING NODES');
+      data.nodes.forEach(n => {
+        document.getElementById(`model-${n.name}`).textContent = n.model.split('/').pop();
+        document.getElementById(`persona-${n.name}`).textContent = n.persona;
+      });
+      break;
+
+    case 'node_start':
+      setNodeStatus(data.node, 'thinking', 'THINKING');
+      const el = document.getElementById(`content-${data.node}`);
+      el.className = 'node-content';
+      el.textContent = '...';
+      break;
+
+    case 'node_done':
+      setNodeStatus(data.node, 'done', 'COMPLETE');
+      setNodeContent(data.node, data.answer);
+      document.getElementById(`latency-${data.node}`).textContent = `${data.latency_ms}ms`;
+      break;
+
+    case 'node_error':
+      setNodeStatus(data.node, 'error', 'FAILED');
+      setNodeContent(data.node, `ERROR: ${data.error}`);
+      break;
+
+    case 'agreement':
+      setStatus('working', `AGREEMENT: ${(data.score * 100).toFixed(0)}% → ${data.route.toUpperCase()}`);
+      break;
+
+    case 'critique_start':
+      document.getElementById('critiqueBar').classList.add('visible');
+      document.getElementById('critiqueRound').textContent = data.round;
+      ['melchior', 'balthasar', 'casper'].forEach(n => {
+        const s = document.getElementById(`status-${n}`);
+        if (s.textContent !== 'FAILED') setNodeStatus(n, 'critiquing', 'CRITIQUING');
+      });
+      setStatus('working', `CRITIQUE ROUND ${data.round}`);
+      break;
+
+    case 'critique_done':
+      setNodeStatus(data.node, 'done', `R${data.round} DONE`);
+      setNodeContent(data.node, data.answer);
+      break;
+
+    case 'critique_agreement':
+      document.getElementById('critiqueAgreement').textContent =
+        `${(data.score * 100).toFixed(0)}%`;
+      break;
+
+    case 'decision':
+      setStatus('', 'DECISION RENDERED');
+      document.getElementById('progressBar').classList.remove('active');
+
+      const panel = document.getElementById('decisionPanel');
+      panel.classList.remove('hidden');
+
+      // Confidence
+      const confPct = (data.confidence * 100).toFixed(0);
+      const confEl = document.getElementById('confidenceValue');
+      confEl.textContent = `${confPct}%`;
+      confEl.className = `metric-value ${data.confidence > 0.7 ? 'high' : data.confidence > 0.4 ? 'medium' : 'low'}`;
+
+      document.getElementById('protocolValue').textContent = data.protocol_used;
+      document.getElementById('latencyValue').textContent = `${(data.latency_ms / 1000).toFixed(1)}s`;
+      document.getElementById('rulingText').textContent = data.ruling;
+
+      if (data.minority_report) {
+        document.getElementById('minoritySection').style.display = 'block';
+        document.getElementById('minorityText').textContent = data.minority_report;
+      }
+      break;
+
+    case 'error':
+      setStatus('error', data.message);
+      break;
+  }
+}
+
+// Enter key to execute
+document.getElementById('queryInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    execute();
+  }
+});
+</script>
+</body>
+</html>

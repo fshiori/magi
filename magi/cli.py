@@ -205,5 +205,19 @@ def replay(trace_id: str, trace_dir: str | None):
     click.echo(format_replay(match[0]))
 
 
+@main.command()
+@click.option("--host", default="0.0.0.0", help="Server host")
+@click.option("--port", default=3000, help="Server port")
+def dashboard(host: str, port: int):
+    """Launch NERV Command Center — real-time MAGI visualization."""
+    try:
+        from magi.web.server import start_server
+    except ImportError:
+        click.echo("Web dependencies not installed. Run: pip install magi-system[web]", err=True)
+        sys.exit(1)
+    click.echo(f"NERV Command Center starting at http://localhost:{port}")
+    start_server(host=host, port=port)
+
+
 if __name__ == "__main__":
     main()
