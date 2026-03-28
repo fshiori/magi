@@ -194,8 +194,13 @@ async def ws_ask(ws: WebSocket):
                             "node": name,
                             "answer": revised[:2000],
                         })
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        await ws.send_json({
+                            "event": "critique_error",
+                            "round": round_num + 1,
+                            "node": name,
+                            "error": str(e)[:200],
+                        })
 
                 agreement = _estimate_agreement(list(current_answers.values()))
                 await ws.send_json({

@@ -23,200 +23,123 @@
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
   body {
-    background: var(--bg);
-    color: var(--orange);
+    background: var(--bg); color: var(--orange);
     font-family: 'Share Tech Mono', monospace;
-    overflow: hidden;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
+    overflow: hidden; height: 100vh; display: flex; flex-direction: column;
   }
-
-  /* CRT SCANLINES */
   body::after {
-    content: '';
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: repeating-linear-gradient(
-      transparent, transparent 2px,
-      rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px
-    );
-    pointer-events: none;
-    z-index: 9999;
+    content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
+    pointer-events: none; z-index: 9999;
   }
 
   /* TOP BAR */
   .top-bar {
-    display: flex;
-    justify-content: space-between;
-    padding: 6px 16px;
-    font-size: 11px;
-    border-bottom: 1px solid var(--orange-dim);
-    background: #0a0505;
-    flex-shrink: 0;
+    display: flex; justify-content: space-between; padding: 6px 16px;
+    font-size: 11px; border-bottom: 1px solid var(--orange-dim); background: #0a0505; flex-shrink: 0;
   }
   .top-bar .sys-info { color: var(--orange); letter-spacing: 1px; }
   .top-bar .jp-text { font-size: 16px; color: var(--orange); font-weight: bold; }
 
   /* MAIN */
-  .main {
-    flex: 1;
-    display: flex;
-    position: relative;
-    overflow: hidden;
-  }
+  .main { flex: 1; display: flex; position: relative; overflow: hidden; }
 
   /* LEFT PANEL */
   .sys-panel {
-    width: 220px;
-    padding: 12px;
-    border-right: 1px solid var(--orange-dim);
-    font-size: 11px;
-    line-height: 1.8;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
+    width: 200px; padding: 12px; border-right: 1px solid var(--orange-dim);
+    font-size: 11px; flex-shrink: 0; display: flex; flex-direction: column;
   }
-  .sys-panel .code-block { color: var(--orange); margin-bottom: 16px; }
-  .sys-panel .code-block .label { color: var(--orange-dim); font-size: 9px; letter-spacing: 2px; margin-bottom: 4px; }
-  .sys-panel .code-block .value { font-size: 18px; font-family: 'Orbitron', sans-serif; font-weight: 700; }
+  .sys-panel .code-block { color: var(--orange); margin-bottom: 12px; }
+  .sys-panel .label { color: var(--orange-dim); font-size: 8px; letter-spacing: 2px; margin-bottom: 2px; }
+  .sys-panel .value { font-size: 14px; font-family: 'Orbitron', sans-serif; font-weight: 700; }
   .mode-select {
     background: #111; border: 1px solid var(--orange-dim); color: var(--orange);
-    font-family: 'Share Tech Mono', monospace; font-size: 11px; padding: 6px 8px; width: 100%; margin-top: 4px;
+    font-family: 'Share Tech Mono', monospace; font-size: 11px; padding: 5px 6px; width: 100%; margin-top: 4px;
   }
   .mode-select:focus { outline: none; border-color: var(--orange); }
 
-  /* RIGHT PANEL — VOTE STATUS */
-  .vote-panel {
-    width: 260px;
-    border-left: 1px solid var(--orange-dim);
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    font-size: 11px;
+  /* RIGHT PANEL — RESULT */
+  .result-panel {
+    width: 320px; border-left: 1px solid var(--orange-dim);
+    flex-shrink: 0; display: flex; flex-direction: column;
   }
-  .vote-panel .panel-title {
-    padding: 8px 12px;
-    border-bottom: 1px solid var(--orange-dim);
-    font-family: 'Orbitron', sans-serif;
-    font-size: 11px;
-    letter-spacing: 2px;
+  .result-panel .panel-title {
+    padding: 8px 12px; border-bottom: 1px solid var(--orange-dim);
+    font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 2px;
   }
-  .vote-panel .jp-title { float: right; font-family: sans-serif; font-size: 14px; }
+  .result-panel .jp-title { float: right; font-family: sans-serif; font-size: 14px; }
 
-  /* Vote indicators — EVA style */
-  .vote-nodes {
-    display: flex;
-    flex-direction: column;
+  /* Verdict — the big visual answer */
+  .verdict-box {
+    padding: 16px 12px; text-align: center; border-bottom: 1px solid #111;
   }
+  .verdict-text {
+    font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 900;
+    letter-spacing: 3px; margin-bottom: 4px;
+  }
+  .verdict-text.approve { color: var(--green); }
+  .verdict-text.reject { color: var(--red); }
+  .verdict-text.deadlock { color: var(--orange); animation: lamp-blink 1.5s infinite; }
+  .verdict-text.pending { color: var(--orange-dim); }
+  .verdict-sub { font-size: 10px; color: var(--orange-dim); }
+
+  /* Node vote lamps */
+  .vote-nodes { border-bottom: 1px solid #111; }
   .vote-row {
-    display: flex;
-    align-items: center;
-    padding: 10px 12px;
-    border-bottom: 1px solid #111;
-    gap: 10px;
+    display: flex; align-items: center; padding: 8px 12px; gap: 8px;
+    border-bottom: 1px solid #0a0a0a;
   }
   .vote-lamp {
-    width: 14px; height: 14px;
-    border-radius: 2px;
-    border: 1px solid #333;
-    flex-shrink: 0;
-    transition: all 0.5s;
+    width: 20px; height: 20px; border-radius: 2px; border: 1px solid #333;
+    flex-shrink: 0; transition: all 0.5s;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: bold; color: black;
   }
-  .vote-lamp.idle { background: #222; }
+  .vote-lamp.idle { background: #222; color: #333; }
   .vote-lamp.thinking { background: var(--orange); animation: lamp-blink 0.8s infinite; }
-  .vote-lamp.done { background: var(--green); box-shadow: 0 0 8px var(--green); }
-  .vote-lamp.error { background: var(--red); box-shadow: 0 0 8px var(--red); }
-  .vote-lamp.critiquing { background: var(--orange); box-shadow: 0 0 6px var(--orange); }
+  .vote-lamp.approve { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .vote-lamp.reject { background: var(--red); box-shadow: 0 0 8px var(--red); }
+  .vote-lamp.abstain { background: var(--orange); box-shadow: 0 0 6px var(--orange); }
+  .vote-lamp.error { background: #444; color: #888; }
+  @keyframes lamp-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
 
-  @keyframes lamp-blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.2; }
-  }
-
+  .vote-node-info { flex: 1; }
   .vote-node-name {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 10px;
-    letter-spacing: 1px;
-    width: 90px;
+    font-family: 'Orbitron', sans-serif; font-size: 10px; letter-spacing: 1px;
   }
   .vote-node-name.melchior { color: #ff6666; }
   .vote-node-name.balthasar { color: #6699ff; }
   .vote-node-name.casper { color: #66ff99; }
+  .vote-node-model { font-size: 8px; color: #555; }
+  .vote-node-status { font-size: 9px; color: var(--orange-dim); text-align: right; min-width: 60px; }
 
-  .vote-status-text {
-    font-size: 9px;
-    color: var(--orange-dim);
-    flex: 1;
-    text-align: right;
+  /* Ruling summary */
+  .ruling-area {
+    flex: 1; overflow-y: auto; padding: 10px 12px;
+    font-size: 11px; line-height: 1.6; color: var(--orange);
   }
-
-  /* Metrics grid */
-  .vote-metrics {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1px;
-    background: #111;
-    border-top: 1px solid var(--orange-dim);
-    border-bottom: 1px solid var(--orange-dim);
-  }
-  .vm-cell { background: var(--bg-panel); padding: 10px 8px; text-align: center; }
-  .vm-cell .vm-label { font-size: 8px; color: var(--orange-dim); letter-spacing: 1px; }
-  .vm-cell .vm-value {
-    font-family: 'Orbitron', sans-serif; font-size: 22px; font-weight: 700; margin-top: 4px;
-  }
-  .vm-value.high { color: var(--green); }
-  .vm-value.medium { color: var(--orange); }
-  .vm-value.low { color: var(--red); }
-
-  /* Decision ruling in right panel */
-  .vote-ruling {
-    flex: 1;
-    overflow-y: auto;
-    padding: 8px 12px;
-    font-size: 10px;
-    line-height: 1.5;
-    color: var(--orange);
-  }
-  .vote-ruling .vr-label {
+  .ruling-area .rl-label {
     font-size: 8px; letter-spacing: 2px; color: var(--orange-dim);
-    margin-top: 8px; margin-bottom: 4px;
-    border-bottom: 1px solid #1a1a1a; padding-bottom: 2px;
+    margin-top: 10px; margin-bottom: 4px; border-bottom: 1px solid #1a1a1a; padding-bottom: 2px;
   }
-  .vote-ruling .vr-text { white-space: pre-wrap; word-break: break-word; }
-  .vote-ruling .vr-minority { color: var(--red); opacity: 0.8; white-space: pre-wrap; word-break: break-word; }
-  .vote-ruling-empty {
+  .ruling-area .rl-text { word-break: break-word; }
+  .ruling-area .rl-minority { color: var(--red); opacity: 0.8; word-break: break-word; }
+  .ruling-empty {
     flex: 1; display: flex; align-items: center; justify-content: center;
     color: var(--orange-dim); font-size: 10px; letter-spacing: 2px;
   }
 
-  /* HEXAGON AREA */
-  .hex-area {
-    flex: 1;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .hex-connections {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;
-  }
+  /* HEX AREA */
+  .hex-area { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; }
+  .hex-connections { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
   .hex-connections line { stroke: var(--orange); stroke-width: 3; opacity: 0.6; }
-  .hex-connections line.active {
-    opacity: 1; filter: drop-shadow(0 0 4px var(--orange)); animation: line-pulse 1.5s infinite;
-  }
+  .hex-connections line.active { opacity: 1; filter: drop-shadow(0 0 4px var(--orange)); animation: line-pulse 1.5s infinite; }
   @keyframes line-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-
   .magi-center {
-    position: absolute;
-    font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 28px;
-    color: var(--orange); letter-spacing: 6px;
-    text-shadow: 0 0 20px var(--orange-glow); z-index: 10;
+    position: absolute; font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 28px;
+    color: var(--orange); letter-spacing: 6px; text-shadow: 0 0 20px var(--orange-glow); z-index: 10;
   }
-
-  /* HEXAGON NODE */
   .hex-node { position: absolute; width: 260px; height: 260px; cursor: pointer; }
   .hex-shape {
     width: 100%; height: 100%;
@@ -231,7 +154,6 @@
   .hex-shape.error { background: #d88888; }
   .hex-shape.critiquing { background: #88c8d8; animation: hex-think 2s infinite; }
   @keyframes hex-think { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(0.7); } }
-
   .hex-node-name {
     font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 18px;
     color: var(--dark-blue-text); letter-spacing: 3px; text-align: center;
@@ -248,54 +170,25 @@
   .hex-model-name {
     font-family: 'Share Tech Mono', monospace; font-size: 8px;
     color: var(--dark-blue-text); opacity: 0.5; margin-top: 4px;
-    max-width: 80%; text-align: center; overflow: hidden;
-    text-overflow: ellipsis; white-space: nowrap;
   }
-
-  .hex-node.top  { top: 5%;  left: 50%; transform: translateX(-50%); }
+  .hex-node.top  { top: 5%; left: 50%; transform: translateX(-50%); }
   .hex-node.left { bottom: 8%; left: 12%; }
   .hex-node.right { bottom: 8%; right: 12%; }
 
-  /* NODE DETAIL — auto-popup from bottom */
+  /* DETAIL PANEL */
   .node-detail {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    max-height: 0;
-    background: rgba(5,5,10,0.97);
-    border-top: 2px solid var(--orange);
-    z-index: 100;
-    overflow: hidden;
-    transition: max-height 0.4s ease-out;
-    font-size: 11px; line-height: 1.6;
+    position: absolute; bottom: 0; left: 0; right: 0;
+    max-height: 0; background: rgba(5,5,10,0.97);
+    border-top: 2px solid var(--orange); z-index: 100;
+    overflow: hidden; transition: max-height 0.4s ease-out; font-size: 11px; line-height: 1.6;
   }
-  .node-detail.visible {
-    max-height: 45%;
-    overflow-y: auto;
-  }
+  .node-detail.visible { max-height: 45%; overflow-y: auto; }
   .node-detail .detail-inner { padding: 12px 16px; }
   .node-detail .detail-header {
     display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 8px; position: sticky; top: 0;
-    background: rgba(5,5,10,0.97); padding-bottom: 4px;
+    margin-bottom: 8px; position: sticky; top: 0; background: rgba(5,5,10,0.97); padding-bottom: 4px;
   }
-  .node-detail .detail-title {
-    font-family: 'Orbitron', sans-serif; font-size: 13px; letter-spacing: 2px;
-  }
-  .node-detail .detail-title.melchior { color: #ff6666; }
-  .node-detail .detail-title.balthasar { color: #6699ff; }
-  .node-detail .detail-title.casper { color: #66ff99; }
-  .node-detail .detail-close {
-    cursor: pointer; color: var(--orange-dim); font-size: 14px;
-    padding: 2px 8px; border: 1px solid var(--orange-dim); border-radius: 2px;
-  }
-  .node-detail .detail-close:hover { color: var(--orange); border-color: var(--orange); }
-  .node-detail .detail-body {
-    white-space: pre-wrap; word-break: break-word; color: var(--orange); opacity: 0.9;
-  }
-  /* Tab bar for switching nodes in detail */
-  .detail-tabs {
-    display: flex; gap: 2px; margin-bottom: 8px;
-  }
+  .detail-tabs { display: flex; gap: 2px; }
   .detail-tab {
     padding: 4px 12px; font-size: 9px; letter-spacing: 1px;
     cursor: pointer; border: 1px solid #333; background: #111;
@@ -306,11 +199,17 @@
   .detail-tab.melchior.active { background: #ff6666; }
   .detail-tab.balthasar.active { background: #6699ff; }
   .detail-tab.casper.active { background: #66ff99; }
+  .detail-close {
+    cursor: pointer; color: var(--orange-dim); font-size: 12px;
+    padding: 2px 8px; border: 1px solid var(--orange-dim); border-radius: 2px;
+  }
+  .detail-close:hover { color: var(--orange); border-color: var(--orange); }
+  .detail-body { word-break: break-word; color: var(--orange); opacity: 0.9; }
 
   /* INPUT BAR */
   .input-bar {
-    display: flex; padding: 8px 16px;
-    border-top: 1px solid var(--orange-dim); background: #050505; gap: 8px; flex-shrink: 0;
+    display: flex; padding: 8px 16px; border-top: 1px solid var(--orange-dim);
+    background: #050505; gap: 8px; flex-shrink: 0;
   }
   .input-bar textarea {
     flex: 1; background: #0a0a0a; border: 1px solid var(--orange-dim);
@@ -331,8 +230,8 @@
   @keyframes btn-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
   @media (max-width: 1200px) {
-    .sys-panel { width: 180px; }
-    .vote-panel { width: 220px; }
+    .sys-panel { width: 160px; }
+    .result-panel { width: 260px; }
     .hex-node { width: 200px; height: 200px; }
     .hex-node-name { font-size: 14px; }
   }
@@ -341,7 +240,7 @@
 <body>
 
 <div class="top-bar">
-  <div class="sys-info" id="sysInfo">FILE:MAGI_SYS&nbsp;&nbsp;&nbsp;EXTENTION:6008&nbsp;&nbsp;&nbsp;EX_MODE:OFF&nbsp;&nbsp;&nbsp;PRIORITY:AAA</div>
+  <div class="sys-info">FILE:MAGI_SYS&nbsp;&nbsp;&nbsp;EXTENTION:6008&nbsp;&nbsp;&nbsp;EX_MODE:OFF&nbsp;&nbsp;&nbsp;PRIORITY:AAA</div>
   <div>
     <span class="jp-text">決議</span>&nbsp;&nbsp;
     <span class="sys-info" id="statusText">STANDBY</span>
@@ -358,25 +257,25 @@
     </div>
     <div class="code-block">
       <div class="label">PROTOCOL</div>
-      <div class="value" style="font-size:13px" id="protoValue">STANDBY</div>
+      <div class="value" style="font-size:12px" id="protoValue">STANDBY</div>
     </div>
     <div class="code-block">
-      <div class="label">AGREEMENT</div>
-      <div class="value" id="agreeValue">---</div>
+      <div class="label">ROUNDS</div>
+      <div class="value" id="roundValue">0</div>
     </div>
     <div class="code-block">
       <div class="label">LATENCY</div>
-      <div class="value" style="font-size:14px" id="latValue">---</div>
+      <div class="value" style="font-size:12px" id="latValue">---</div>
     </div>
     <div style="margin-top:auto">
-      <div class="label" style="color:var(--orange-dim);font-size:9px;letter-spacing:2px;margin-bottom:4px">MODE</div>
+      <div class="label">MODE</div>
       <select class="mode-select" id="modeSelect">
         <option value="adaptive">ADAPTIVE</option>
         <option value="vote">VOTE</option>
         <option value="critique">CRITIQUE</option>
         <option value="escalate">ESCALATE</option>
       </select>
-      <div class="label" style="color:var(--orange-dim);font-size:9px;letter-spacing:2px;margin-top:12px;margin-bottom:4px">PRESET</div>
+      <div class="label" style="margin-top:8px">PRESET</div>
       <select class="mode-select" id="presetSelect">
         <option value="eva">EVA</option>
         <option value="code-review">CODE REVIEW</option>
@@ -417,14 +316,13 @@
       </div>
     </div>
 
-    <!-- Auto-popup detail panel -->
     <div class="node-detail" id="nodeDetail">
       <div class="detail-inner">
         <div class="detail-header">
           <div class="detail-tabs" id="detailTabs">
-            <div class="detail-tab melchior" data-node="melchior" onclick="switchTab('melchior')">MELCHIOR</div>
-            <div class="detail-tab balthasar" data-node="balthasar" onclick="switchTab('balthasar')">BALTHASAR</div>
-            <div class="detail-tab casper" data-node="casper" onclick="switchTab('casper')">CASPER</div>
+            <div class="detail-tab melchior" onclick="switchTab('melchior')">MELCHIOR</div>
+            <div class="detail-tab balthasar" onclick="switchTab('balthasar')">BALTHASAR</div>
+            <div class="detail-tab casper" onclick="switchTab('casper')">CASPER</div>
           </div>
           <span class="detail-close" onclick="hideDetail()">CLOSE</span>
         </div>
@@ -433,43 +331,49 @@
     </div>
   </div>
 
-  <!-- RIGHT — VOTE STATUS -->
-  <div class="vote-panel">
+  <!-- RIGHT — RESULT -->
+  <div class="result-panel">
     <div class="panel-title">
-      VOTE STATUS <span class="jp-title">決議結果</span>
+      RESULT <span class="jp-title">決議結果</span>
     </div>
 
+    <!-- Verdict: the one thing users need to see -->
+    <div class="verdict-box">
+      <div class="verdict-text pending" id="verdictText">AWAITING</div>
+      <div class="verdict-sub" id="verdictSub">Submit a query to begin</div>
+    </div>
+
+    <!-- Node voting status -->
     <div class="vote-nodes">
       <div class="vote-row">
         <div class="vote-lamp idle" id="lampMelchior"></div>
-        <div class="vote-node-name melchior">MELCHIOR</div>
-        <div class="vote-status-text" id="vstatMelchior">IDLE</div>
+        <div class="vote-node-info">
+          <div class="vote-node-name melchior">MELCHIOR</div>
+          <div class="vote-node-model" id="rvModelMelchior">-</div>
+        </div>
+        <div class="vote-node-status" id="vstatMelchior">IDLE</div>
       </div>
       <div class="vote-row">
         <div class="vote-lamp idle" id="lampBalthasar"></div>
-        <div class="vote-node-name balthasar">BALTHASAR</div>
-        <div class="vote-status-text" id="vstatBalthasar">IDLE</div>
+        <div class="vote-node-info">
+          <div class="vote-node-name balthasar">BALTHASAR</div>
+          <div class="vote-node-model" id="rvModelBalthasar">-</div>
+        </div>
+        <div class="vote-node-status" id="vstatBalthasar">IDLE</div>
       </div>
       <div class="vote-row">
         <div class="vote-lamp idle" id="lampCasper"></div>
-        <div class="vote-node-name casper">CASPER</div>
-        <div class="vote-status-text" id="vstatCasper">IDLE</div>
+        <div class="vote-node-info">
+          <div class="vote-node-name casper">CASPER</div>
+          <div class="vote-node-model" id="rvModelCasper">-</div>
+        </div>
+        <div class="vote-node-status" id="vstatCasper">IDLE</div>
       </div>
     </div>
 
-    <div class="vote-metrics">
-      <div class="vm-cell">
-        <div class="vm-label">CONFIDENCE</div>
-        <div class="vm-value" id="confValue">---</div>
-      </div>
-      <div class="vm-cell">
-        <div class="vm-label">ROUNDS</div>
-        <div class="vm-value" id="roundValue">0</div>
-      </div>
-    </div>
-
-    <div class="vote-ruling" id="rulingArea">
-      <div class="vote-ruling-empty">AWAITING QUERY</div>
+    <!-- Ruling content -->
+    <div class="ruling-area" id="rulingArea">
+      <div class="ruling-empty">AWAITING QUERY</div>
     </div>
   </div>
 
@@ -500,8 +404,7 @@ function drawConnections() {
   svg.innerHTML = `
     <line x1="${m.x}" y1="${m.y}" x2="${b.x}" y2="${b.y}"/>
     <line x1="${m.x}" y1="${m.y}" x2="${c.x}" y2="${c.y}"/>
-    <line x1="${b.x}" y1="${b.y}" x2="${c.x}" y2="${c.y}"/>
-  `;
+    <line x1="${b.x}" y1="${b.y}" x2="${c.x}" y2="${c.y}"/>`;
   const mc = document.getElementById('magiCenter');
   mc.style.left = (m.x+b.x+c.x)/3 + 'px';
   mc.style.top = (m.y+b.y+c.y)/3 + 'px';
@@ -513,57 +416,53 @@ setTimeout(drawConnections, 100);
 function setHexStatus(node, status, text) {
   document.getElementById(`shape${cap(node)}`).className = `hex-shape ${status}`;
   document.getElementById(`badge${cap(node)}`).textContent = text || status.toUpperCase();
-  // Sync lamp
-  document.getElementById(`lamp${cap(node)}`).className = `vote-lamp ${status}`;
   document.getElementById(`vstat${cap(node)}`).textContent = text || status.toUpperCase();
+}
+
+function setLamp(node, state) {
+  document.getElementById(`lamp${cap(node)}`).className = `vote-lamp ${state}`;
 }
 
 function setLinesActive(active) {
   document.querySelectorAll('.hex-connections line').forEach(l => l.classList.toggle('active', active));
 }
 
-// Detail panel with tabs
+function setVerdict(type, text, sub) {
+  const el = document.getElementById('verdictText');
+  el.className = `verdict-text ${type}`;
+  el.textContent = text;
+  document.getElementById('verdictSub').textContent = sub || '';
+}
+
 function showDetail(node) {
   activeTab = node;
   updateDetailContent();
   document.getElementById('nodeDetail').classList.add('visible');
-  // Highlight active tab
   document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
   document.querySelector(`.detail-tab.${node}`).classList.add('active');
 }
-
 function switchTab(node) {
   activeTab = node;
   updateDetailContent();
   document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
   document.querySelector(`.detail-tab.${node}`).classList.add('active');
 }
-
 function updateDetailContent() {
-  document.getElementById('detailBody').textContent = nodeAnswers[activeTab] || 'Waiting for response...';
+  document.getElementById('detailBody').innerHTML = renderMd(nodeAnswers[activeTab] || 'Waiting for response...');
 }
-
-function hideDetail() {
-  document.getElementById('nodeDetail').classList.remove('visible');
-}
-
-// Auto-show detail when a node completes
-function autoShowNode(node) {
-  showDetail(node);
-}
+function hideDetail() { document.getElementById('nodeDetail').classList.remove('visible'); }
+function autoShowNode(node) { showDetail(node); }
 
 function resetUI() {
-  ['melchior','balthasar','casper'].forEach(n => setHexStatus(n, 'idle', 'IDLE'));
+  ['melchior','balthasar','casper'].forEach(n => { setHexStatus(n, 'idle', 'IDLE'); setLamp(n, 'idle'); });
   setLinesActive(false);
   nodeAnswers = {};
   currentRound = 0;
   document.getElementById('protoValue').textContent = 'STANDBY';
-  document.getElementById('agreeValue').textContent = '---';
-  document.getElementById('latValue').textContent = '---';
-  document.getElementById('confValue').textContent = '---';
-  document.getElementById('confValue').className = 'vm-value';
   document.getElementById('roundValue').textContent = '0';
-  document.getElementById('rulingArea').innerHTML = '<div class="vote-ruling-empty">PROCESSING...</div>';
+  document.getElementById('latValue').textContent = '---';
+  setVerdict('pending', 'PROCESSING', 'Querying MAGI nodes...');
+  document.getElementById('rulingArea').innerHTML = '<div class="ruling-empty">PROCESSING...</div>';
   hideDetail();
 }
 
@@ -590,6 +489,7 @@ function execute() {
   ws.onclose = () => { btn.disabled = false; btn.classList.remove('running'); btn.textContent = 'EXECUTE'; };
   ws.onerror = () => {
     document.getElementById('statusText').textContent = 'CONNECTION FAILED';
+    setVerdict('divided', 'ERROR', 'Connection failed');
     btn.disabled = false; btn.classList.remove('running'); btn.textContent = 'EXECUTE';
   };
 }
@@ -602,27 +502,38 @@ function handleEvent(data) {
       data.nodes.forEach(n => {
         const short = n.model.split('/').pop().replace(':free','');
         document.getElementById(`model${cap(n.name)}`).textContent = short;
+        document.getElementById(`rvModel${cap(n.name)}`).textContent = short;
       });
+      setVerdict('pending', 'THINKING', 'Nodes are analyzing...');
       break;
 
     case 'node_start':
       setHexStatus(data.node, 'thinking', 'THINKING');
+      setLamp(data.node, 'thinking');
       break;
 
     case 'node_done':
       setHexStatus(data.node, 'done', 'COMPLETE');
+      setLamp(data.node, 'approve'); // temporary, final vote set on decision
       nodeAnswers[data.node] = data.answer;
-      autoShowNode(data.node);  // auto-popup
+      autoShowNode(data.node);
       break;
 
     case 'node_error':
       setHexStatus(data.node, 'error', 'FAILED');
+      setLamp(data.node, 'error');
       nodeAnswers[data.node] = 'ERROR: ' + data.error;
       break;
 
     case 'agreement':
-      document.getElementById('agreeValue').textContent = (data.score*100).toFixed(0) + '%';
       document.getElementById('protoValue').textContent = data.route.toUpperCase();
+      if (data.route === 'vote') {
+        setVerdict('pending', 'VOTING', 'High agreement, voting...');
+      } else if (data.route === 'critique') {
+        setVerdict('pending', 'DEBATING', 'Disagreement detected, models debating...');
+      } else {
+        setVerdict('pending', 'ESCALATING', 'Major disagreement, forced resolution...');
+      }
       document.getElementById('statusText').textContent = `ROUTE: ${data.route.toUpperCase()}`;
       break;
 
@@ -630,46 +541,89 @@ function handleEvent(data) {
       currentRound = data.round;
       document.getElementById('roundValue').textContent = data.round;
       document.getElementById('statusText').textContent = `CRITIQUE R${data.round}`;
+      setVerdict('pending', `DEBATE R${data.round}`, 'Models critiquing each other...');
       ['melchior','balthasar','casper'].forEach(n => {
-        if (document.getElementById(`badge${cap(n)}`).textContent !== 'FAILED')
+        if (document.getElementById(`badge${cap(n)}`).textContent !== 'FAILED') {
           setHexStatus(n, 'critiquing', `CRITIQUE R${data.round}`);
+          setLamp(n, 'thinking');
+        }
       });
       break;
 
     case 'critique_done':
       setHexStatus(data.node, 'done', `R${data.round} DONE`);
+      setLamp(data.node, 'approve');
       nodeAnswers[data.node] = data.answer;
       autoShowNode(data.node);
       break;
 
-    case 'critique_agreement':
-      document.getElementById('agreeValue').textContent = (data.score*100).toFixed(0) + '%';
+    case 'critique_error':
+      setHexStatus(data.node, 'error', `R${data.round} FAIL`);
+      setLamp(data.node, 'error');
       break;
 
-    case 'decision':
+    case 'critique_agreement':
+      break;
+
+    case 'decision': {
       setLinesActive(false);
       document.getElementById('statusText').textContent = 'DECISION RENDERED';
-      const conf = (data.confidence*100).toFixed(0);
-      const confEl = document.getElementById('confValue');
-      confEl.textContent = conf + '%';
-      confEl.className = 'vm-value ' + (data.confidence > 0.7 ? 'high' : data.confidence > 0.4 ? 'medium' : 'low');
       document.getElementById('latValue').textContent = (data.latency_ms/1000).toFixed(1) + 's';
       document.getElementById('protoValue').textContent = data.protocol_used.toUpperCase();
 
-      let html = '<div class="vr-label">RULING</div>';
-      html += `<div class="vr-text">${escHtml(data.ruling).substring(0, 2000)}</div>`;
+      // EVA-style verdict: 承認 / 否決 / 膠着
+      const conf = data.confidence;
+      const hasMinority = data.minority_report && data.minority_report.length > 0;
+      const failedCount = (data.failed_nodes || []).length;
+      const voteCount = Object.keys(data.votes || {}).length;
+
+      // Determine each node's vote: approve (agrees with ruling) or reject (disagrees)
+      const ruling = data.ruling || '';
+      const nodeVotes = {};
+      for (const [name, answer] of Object.entries(data.votes || {})) {
+        nodeVotes[name] = (answer === ruling) ? 'approve' : 'reject';
+      }
+      (data.failed_nodes || []).forEach(n => { nodeVotes[n] = 'abstain'; });
+
+      const approveCount = Object.values(nodeVotes).filter(v => v === 'approve').length;
+      const rejectCount = Object.values(nodeVotes).filter(v => v === 'reject').length;
+      const abstainCount = Object.values(nodeVotes).filter(v => v === 'abstain').length;
+
+      // Set per-node lamp + status text
+      for (const [name, vote] of Object.entries(nodeVotes)) {
+        setLamp(name, vote);
+        const labels = { approve: '承認', reject: '否決', abstain: '棄権' };
+        document.getElementById(`vstat${cap(name)}`).textContent = labels[vote] || vote;
+      }
+
+      // Overall verdict
+      if (approveCount >= 2 && rejectCount === 0) {
+        setVerdict('approve', '承認', 'APPROVED — consensus reached');
+      } else if (approveCount >= 2) {
+        setVerdict('approve', '承認', `APPROVED — ${approveCount} of ${voteCount + failedCount} agree`);
+      } else if (rejectCount >= 2) {
+        setVerdict('reject', '否決', `REJECTED — ${rejectCount} of ${voteCount + failedCount} disagree`);
+      } else {
+        setVerdict('deadlock', '膠着', 'DEADLOCK — no consensus');
+      }
+
+      // Build ruling area
+      let html = '<div class="rl-label">決議內容 RULING</div>';
+      html += `<div class="rl-text">${renderMd(data.ruling.substring(0, 3000))}</div>`;
       if (data.minority_report) {
-        html += '<div class="vr-label" style="color:var(--red)">MINORITY REPORT</div>';
-        html += `<div class="vr-minority">${escHtml(data.minority_report).substring(0, 1500)}</div>`;
+        html += '<div class="rl-label" style="color:var(--red)">反對意見 DISSENT</div>';
+        html += `<div class="rl-minority">${renderMd(data.minority_report.substring(0, 2000))}</div>`;
       }
       if (data.degraded) {
-        html += `<div class="vr-label" style="color:var(--red)">DEGRADED: ${data.failed_nodes.join(', ')}</div>`;
+        html += `<div class="rl-label" style="color:var(--red)">NODE FAILURE: ${data.failed_nodes.join(', ')}</div>`;
       }
       document.getElementById('rulingArea').innerHTML = html;
       break;
+    }
 
     case 'error':
-      document.getElementById('statusText').textContent = 'ERROR: ' + data.message;
+      document.getElementById('statusText').textContent = 'ERROR';
+      setVerdict('divided', 'ERROR', data.message);
       break;
   }
 }
@@ -678,14 +632,29 @@ function escHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
 }
 
+function renderMd(s) {
+  let h = escHtml(s);
+  h = h.replace(/```(\w*)<br>([\s\S]*?)```/g, '<pre style="background:#111;padding:8px;margin:4px 0;border-radius:2px;overflow-x:auto;font-size:10px">$2</pre>');
+  h = h.replace(/^(#{1,3})\s+(.+)/gm, (m, hashes, text) => {
+    const sz = hashes.length === 1 ? '14px' : hashes.length === 2 ? '12px' : '11px';
+    return `<div style="font-size:${sz};font-weight:bold;color:var(--orange);margin:8px 0 4px">${text}</div>`;
+  });
+  h = h.replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--orange)">$1</strong>');
+  h = h.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  h = h.replace(/^[-*]\s+(.+)/gm, '<div style="padding-left:12px">- $1</div>');
+  h = h.replace(/^(\d+)\.\s+(.+)/gm, '<div style="padding-left:12px">$1. $2</div>');
+  return h;
+}
+
 document.getElementById('queryInput').addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); execute(); }
 });
 
 fetch('/api/defaults').then(r => r.json()).then(data => {
   ['melchior','balthasar','casper'].forEach(n => {
-    const model = data[n] || '-';
-    document.getElementById(`model${cap(n)}`).textContent = model.split('/').pop().replace(':free','');
+    const short = (data[n] || '-').split('/').pop().replace(':free','');
+    document.getElementById(`model${cap(n)}`).textContent = short;
+    document.getElementById(`rvModel${cap(n)}`).textContent = short;
   });
 }).catch(() => {});
 </script>
