@@ -233,6 +233,19 @@
     border-radius: 2px;
   }
 
+  .hex-model-name {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 8px;
+    color: var(--dark-blue-text);
+    opacity: 0.5;
+    margin-top: 4px;
+    max-width: 80%;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   /* Hexagon positioning — triangle layout */
   .hex-node.top    { top: 5%;  left: 50%; transform: translateX(-50%); }
   .hex-node.left   { bottom: 8%; left: 12%; }
@@ -512,6 +525,7 @@
         <div class="hex-node-name">MELCHIOR</div>
         <div class="hex-node-number">1</div>
         <div class="hex-status-badge" id="badgeMelchior">IDLE</div>
+        <div class="hex-model-name" id="modelMelchior">—</div>
       </div>
     </div>
 
@@ -520,6 +534,7 @@
         <div class="hex-node-name">BALTHASAR</div>
         <div class="hex-node-number">2</div>
         <div class="hex-status-badge" id="badgeBalthasar">IDLE</div>
+        <div class="hex-model-name" id="modelBalthasar">—</div>
       </div>
     </div>
 
@@ -528,6 +543,7 @@
         <div class="hex-node-name">CASPER</div>
         <div class="hex-node-number">3</div>
         <div class="hex-status-badge" id="badgeCasper">IDLE</div>
+        <div class="hex-model-name" id="modelCasper">—</div>
       </div>
     </div>
 
@@ -697,6 +713,11 @@ function handleEvent(data) {
     case 'start':
       document.getElementById('statusText').textContent = 'QUERYING NODES';
       document.getElementById('protoValue').textContent = data.mode.toUpperCase();
+      data.nodes.forEach(n => {
+        const cap = n.name.charAt(0).toUpperCase() + n.name.slice(1);
+        const short = n.model.split('/').pop().replace(':free','');
+        document.getElementById(`model${cap}`).textContent = short;
+      });
       break;
 
     case 'node_start':
