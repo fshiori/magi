@@ -58,13 +58,16 @@ pip install -e ".[dev]"
 ## Quick Start
 
 ```bash
+# Set your API key (OpenRouter gives you access to all models with one key)
+export OPENROUTER_API_KEY=sk-or-...
+
+# Ask a question — three models debate, one decision emerges
+magi ask "Should we use microservices or a monolith?"
+
 # Multi-model code review (the killer use case)
 magi diff --staged
 
-# Ask a question with three perspectives
-magi ask "Should we use microservices or a monolith?"
-
-# Use critique mode for higher quality (slower, but models debate)
+# Critique mode: models debate until consensus (slower, higher quality)
 magi ask "Is Rust better than Go for backend services?" --mode critique
 
 # Adaptive mode: auto-selects vote/critique/escalate based on disagreement
@@ -73,13 +76,13 @@ magi ask "What caused the 2008 financial crisis?" --mode adaptive
 # Multi-model answer scoring
 magi judge -q "What is quantum entanglement?" -a "It means particles are connected"
 
-# Run benchmark
+# NERV Command Center — real-time dashboard
+pip install magi-system[web]
+magi dashboard
+
+# Run benchmark, view analytics, replay decisions
 magi bench
-
-# View decision analytics
 magi analytics
-
-# Replay a specific decision
 magi replay <trace-id>
 
 # List persona presets
@@ -141,9 +144,9 @@ import asyncio
 from magi import MAGI
 
 engine = MAGI(
-    melchior="claude-sonnet-4-6",
-    balthasar="gpt-4o",
-    casper="gemini/gemini-2.5-pro",
+    melchior="openrouter/deepseek/deepseek-v3.2",
+    balthasar="openrouter/xiaomi/mimo-v2-pro",
+    casper="openrouter/minimax/minimax-m2.7",
 )
 
 decision = asyncio.run(engine.ask(
@@ -223,6 +226,9 @@ magi/
 │   ├── diff.py         # Multi-model code review
 │   ├── judge.py        # Multi-model answer scoring
 │   └── analytics.py    # Trace analysis and replay
+├── web/
+│   ├── server.py       # FastAPI + WebSocket server
+│   └── static/         # NERV Command Center UI
 ├── presets/             # Persona preset definitions
 ├── bench/              # Benchmark runner and datasets
 ├── trace/              # JSONL trace logging
@@ -240,13 +246,32 @@ python -m pytest tests/ -v
 
 83 tests covering all protocols, degradation modes, and edge cases.
 
+Published on [PyPI](https://pypi.org/project/magi-system/).
+
+## NERV Command Center
+
+Real-time dashboard showing the three MAGI nodes thinking, debating, and reaching a decision. EVA-accurate hexagonal layout with vote status lamps (承認/否決/膠着).
+
+```bash
+pip install magi-system[web]
+magi dashboard
+# Open http://localhost:3000
+```
+
+Features:
+- Live WebSocket streaming of node responses
+- Critique round tracking with agreement score
+- EVA-style verdict display: 承認 (approve), 否決 (reject), 膠着 (deadlock)
+- Click any hexagon to see the full response
+- Auto-popup when nodes complete
+- Markdown rendering for LLM output
+
 ## Roadmap
 
 - [ ] MAGI-as-API-Gateway — OpenAI-compatible proxy, any app just changes `base_url`
-- [ ] NERV Command Center UI — real-time visualization of the decision process
 - [ ] LLM-as-judge agreement scoring (replace word-overlap heuristic)
 - [ ] Scorecard weighted voting (after sufficient data collection)
-- [ ] PyPI publish
+- [ ] Streaming token output in NERV UI
 
 ## Name
 
