@@ -44,7 +44,11 @@ class MagiNode:
                 ),
                 timeout=self.timeout,
             )
-            content = response.choices[0].message.content
+            msg = response.choices[0].message
+            content = msg.content
+            # Reasoning models (e.g. MiniMax M2.7) put output in reasoning_content
+            if not content and hasattr(msg, "reasoning_content") and msg.reasoning_content:
+                content = msg.reasoning_content
             if not content or not content.strip():
                 raise ValueError(f"Node {self.name} returned empty response")
             return content.strip()

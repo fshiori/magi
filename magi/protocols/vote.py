@@ -1,32 +1,85 @@
+"""VoteProtocol — structured voting with position extraction.
+
+Each node is asked to state a clear POSITION first (a short tag like A/B/C/D,
+YES/NO, APPROVE/REJECT), then explain. Voting is based on extracted positions,
+not full-text comparison.
+"""
 import asyncio
+import re
 from collections import Counter
 from magi.core.decision import Decision
 import time
 
 
-async def vote(query: str, nodes, timeout: float = 30.0) -> Decision:
-    """
-    Ask all nodes the same query in parallel, then majority-vote.
-    If all 3 disagree (no majority), return a decision with confidence=0.33
-    and protocol_used="vote_no_majority" to signal the caller should escalate.
+def _wrap_structured_prompt(query: str) -> str:
+    """Wrap query to request structured position + explanation."""
+    return (
+        f"{query}\n\n"
+        "IMPORTANT: Start your response with a clear position on the FIRST LINE.\n"
+        "Format: POSITION: <your stance in a few words>\n"
+        "Then explain your reasoning below."
+    )
 
-    Handles degraded mode: 1-of-3 fail = 2-of-3 vote, 2-of-3 fail = single fallback.
+
+def _extract_position(response: str) -> str:
+    """Extract the structured position from a response.
+
+    Looks for 'POSITION: ...' on the first few lines.
+    Falls back to the first line if no POSITION tag found.
+    """
+    for line in response.strip().split("\n")[:5]:
+        line = line.strip()
+        match = re.match(r"(?:POSITION|Position|position)\s*:\s*(.+)", line)
+        if match:
+            return match.group(1).strip().lower()
+    # Fallback: first non-empty line, lowered and truncated
+    first = response.strip().split("\n")[0].strip().lower()
+    return first[:100]
+
+
+def _find_majority(positions: dict[str, str]) -> tuple[str | None, list[str], list[str]]:
+    """Find majority position among nodes.
+
+    Returns (winning_position, majority_nodes, minority_nodes).
+    If no majority, returns (None, [], all_nodes).
+    """
+    counter = Counter(positions.values())
+    if not counter:
+        return None, [], []
+
+    most_common_pos, count = counter.most_common(1)[0]
+    total = len(positions)
+
+    if count > total / 2:
+        majority = [n for n, p in positions.items() if p == most_common_pos]
+        minority = [n for n, p in positions.items() if p != most_common_pos]
+        return most_common_pos, majority, minority
+
+    return None, [], list(positions.keys())
+
+
+async def vote(query: str, nodes, timeout: float = 30.0) -> Decision:
+    """Ask all nodes the same query in parallel, then majority-vote on positions.
+
+    Each node's response is parsed for a POSITION tag. Voting is based on
+    position similarity, not full-text comparison.
+
+    If no majority exists (all 3 different positions), returns with
+    protocol_used="vote_no_majority" to signal escalation to critique.
     """
     start = time.monotonic()
 
-    # Query all nodes in parallel
-    tasks = {node.name: asyncio.create_task(node.query(query)) for node in nodes}
+    structured_query = _wrap_structured_prompt(query)
+    tasks = {node.name: asyncio.create_task(node.query(structured_query)) for node in nodes}
 
-    results = {}
-    failed = []
-    costs = 0.0
+    results: dict[str, str] = {}
+    failed: list[str] = []
 
     for name, task in tasks.items():
         try:
             results[name] = await task
-        except Exception as e:
+        except Exception:
             failed.append(name)
-            # Log but continue with remaining nodes
 
     elapsed_ms = int((time.monotonic() - start) * 1000)
 
@@ -34,7 +87,6 @@ async def vote(query: str, nodes, timeout: float = 30.0) -> Decision:
         raise RuntimeError("All MAGI nodes failed. Cannot make a decision.")
 
     if len(results) == 1:
-        # Single node fallback
         name, answer = next(iter(results.items()))
         return Decision(
             query=query,
@@ -48,36 +100,45 @@ async def vote(query: str, nodes, timeout: float = 30.0) -> Decision:
             latency_ms=elapsed_ms,
         )
 
-    # Find majority (simple: if 2+ answers are semantically similar, they agree)
-    # For MVP: use exact string comparison won't work. Use a simple heuristic:
-    # Take the response that appears most frequently by checking pairwise overlap.
-    # For now, just pick the longest common agreement or first response.
-    #
-    # Better approach: ask a quick LLM judge, but that adds latency.
-    # Simplest MVP: all responses are unique, confidence = 1/N, ruling = first response.
-    # Real implementation: use the engine's agreement scoring.
+    # Extract positions
+    positions = {name: _extract_position(answer) for name, answer in results.items()}
+    winning_pos, majority_nodes, minority_nodes = _find_majority(positions)
 
-    # MVP: Pick the first response as ruling, calculate a simple confidence
-    # based on how many nodes responded
-    answers = list(results.values())
-    names = list(results.keys())
+    if winning_pos is None:
+        # No majority — signal for escalation
+        # Use first response as provisional ruling
+        first_name = next(iter(results))
+        minority_parts = [
+            f"[{name}] (position: {positions[name]}): {results[name]}"
+            for name in results if name != first_name
+        ]
+        return Decision(
+            query=query,
+            ruling=results[first_name],
+            confidence=1.0 / len(results),
+            minority_report="\n\n".join(minority_parts),
+            votes=results,
+            protocol_used="vote_no_majority",
+            degraded=len(failed) > 0,
+            failed_nodes=failed,
+            latency_ms=elapsed_ms,
+        )
 
-    # Simple majority: if we have 3 answers, confidence based on response count
-    confidence = len(results) / len(nodes)
-    ruling = answers[0]
-    minority_parts = []
+    # Majority found — use first majority node's full response as ruling
+    ruling_node = majority_nodes[0]
+    ruling = results[ruling_node]
+    confidence = len(majority_nodes) / len(results)
 
-    for i, (name, answer) in enumerate(results.items()):
-        if i > 0:
-            minority_parts.append(f"[{name}]: {answer}")
-
-    minority_report = "\n\n".join(minority_parts) if minority_parts else ""
+    minority_parts = [
+        f"[{name}] (position: {positions[name]}): {results[name]}"
+        for name in minority_nodes
+    ]
 
     return Decision(
         query=query,
         ruling=ruling,
         confidence=confidence,
-        minority_report=minority_report,
+        minority_report="\n\n".join(minority_parts),
         votes=results,
         protocol_used="vote",
         degraded=len(failed) > 0,
