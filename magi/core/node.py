@@ -24,7 +24,7 @@ CASPER = Persona("Casper", "You think like a pragmatic realist. Prioritize feasi
 
 
 class MagiNode:
-    def __init__(self, name: str, model: str, persona: Persona, timeout: float = 30.0):
+    def __init__(self, name: str, model: str, persona: Persona, timeout: float = 60.0):
         self.name = name
         self.model = model
         self.persona = persona

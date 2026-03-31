@@ -194,8 +194,8 @@ Tested on **MMLU (Massive Multitask Language Understanding)** "Hell Mode" (Abstr
 
 | Group | Accuracy | Strategy | Verdict |
 |-------|----------|----------|---------|
-| Claude 3.5 Sonnet (Single) | 66.7% | Single Shot | Fast, but misses subtle details |
-| **MAGI Critique (3x Cheap)** | **80.0%** | **ICE Protocol** | **Winner.** Peer review fixes errors |
+| Claude Sonnet 4.6 (Single) | 83.3% | Single Shot | Peak individual performance |
+| **MAGI Critique (3x Cheap)** | **83.3%** | **ICE Protocol** | **Matched.** Beats Sonnet on Logic |
 
 **Models used:** Xiaomi MiMo-v2-pro, MiniMax M2.7, DeepSeek V3.2.
 **Judge:** Verified by Gemini 3.1 Pro via OpenRouter.
@@ -280,6 +280,11 @@ Features:
 In Evangelion, MAGI is a trio of supercomputers created by Dr. Naoko Akagi. Each embodies a different aspect of her personality: **Melchior** (the scientist), **Balthasar** (the mother), and **Casper** (the woman). Decisions are made by majority vote among the three.
 
 MAGI applies this concept to LLMs: same question, three different perspectives, structured disagreement produces better decisions than any single model alone.
+
+## License
+
+MIT
+ctured disagreement produces better decisions than any single model alone.
 
 ## License
 
