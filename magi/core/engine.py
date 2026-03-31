@@ -24,7 +24,7 @@ class MAGI:
         balthasar: str = "gpt-4o",
         casper: str = "gemini/gemini-2.5-pro",
         personas: tuple[Persona, Persona, Persona] | None = None,
-        timeout: float = 30.0,
+        timeout: float = 60.0,
         trace_dir: str | None = None,
     ):
         p = personas or (MELCHIOR, BALTHASAR, CASPER)
