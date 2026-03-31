@@ -287,3 +287,15 @@ e.
 ## License
 
 MIT
+aspect of her personality: **Melchior** (the scientist), **Balthasar** (the mother), and **Casper** (the woman). Decisions are made by majority vote among the three.
+
+MAGI applies this concept to LLMs: same question, three different perspectives, structured disagreement produces better decisions than any single model alone.
+
+## License
+
+MIT
+e.
+
+## License
+
+MIT
