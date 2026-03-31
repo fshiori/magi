@@ -53,12 +53,17 @@ class MagiNode:
                 raise ValueError(f"Node {self.name} returned empty response")
             return content.strip()
         except asyncio.TimeoutError:
+            print(f"Node {self.name} ({self.model}) TIMEOUT after {self.timeout}s")
             raise TimeoutError(f"Node {self.name} ({self.model}) timed out after {self.timeout}s")
         except litellm.AuthenticationError as e:
+            print(f"Node {self.name} ({self.model}) AUTH ERROR: {e}")
             raise AuthenticationError(
                 f"Node {self.name} authentication failed. "
                 f"Please set the API key for {self.model}. Error: {e}"
             ) from e
+        except Exception as e:
+            print(f"Node {self.name} ({self.model}) ERROR: {type(e).__name__}: {e}")
+            raise e
 
 
 class AuthenticationError(Exception):

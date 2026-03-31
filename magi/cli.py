@@ -140,10 +140,13 @@ def presets():
 @click.option("--dataset", default="builtin", help="Dataset to benchmark against")
 @click.option("--mode", default="vote", type=click.Choice(["vote", "critique", "adaptive"]))
 @click.option("--concurrency", default=3, help="Max concurrent questions")
+@click.option("--limit", default=None, type=int, help="Limit number of questions")
+@click.option("--use-judge", is_flag=True, help="Use an LLM to verify answers")
+@click.option("--judge-model", default="openrouter/google/gemini-3.1-pro-preview", help="Model to use as judge")
 @click.option("--melchior", default="claude-sonnet-4-6", help="Model for Melchior node")
 @click.option("--balthasar", default="gpt-4o", help="Model for Balthasar node")
 @click.option("--casper", default="gemini/gemini-2.5-pro", help="Model for Casper node")
-def bench(dataset: str, mode: str, concurrency: int, melchior: str, balthasar: str, casper: str):
+def bench(dataset: str, mode: str, concurrency: int, limit: int | None, use_judge: bool, judge_model: str, melchior: str, balthasar: str, casper: str):
     """Run benchmark: MAGI vs individual models on multiple-choice questions."""
     from magi.bench.datasets import get_dataset
     from magi.bench.runner import run_benchmark
@@ -151,6 +154,8 @@ def bench(dataset: str, mode: str, concurrency: int, melchior: str, balthasar: s
 
     try:
         questions = get_dataset(dataset)
+        if limit:
+            questions = questions[:limit]
     except ValueError as e:
         click.echo(str(e), err=True)
         sys.exit(1)
@@ -158,10 +163,54 @@ def bench(dataset: str, mode: str, concurrency: int, melchior: str, balthasar: s
     engine = MAGI(melchior=melchior, balthasar=balthasar, casper=casper)
     click.echo(f"Running benchmark: {len(questions)} questions, mode={mode}, concurrency={concurrency}")
     click.echo(f"Models: {melchior} / {balthasar} / {casper}")
+    if use_judge:
+        click.echo(f"Judge: {judge_model}")
     click.echo("")
 
     try:
-        report = asyncio.run(run_benchmark(engine, questions, mode=mode, concurrency=concurrency))
+        report = asyncio.run(run_benchmark(
+            engine, questions, mode=mode, concurrency=concurrency,
+            use_judge=use_judge, judge_model=judge_model
+        ))
+    except Exception as e:
+        click.echo(f"Benchmark failed: {e}", err=True)
+        sys.exit(1)
+
+    click.echo(format_report(report))
+
+
+@main.command()
+@click.option("--model", required=True, help="Model to evaluate")
+@click.option("--dataset", default="builtin", help="Dataset to benchmark against")
+@click.option("--concurrency", default=5, help="Max concurrent questions")
+@click.option("--limit", default=None, type=int, help="Limit number of questions")
+@click.option("--use-judge", is_flag=True, help="Use an LLM to verify answers")
+@click.option("--judge-model", default="openrouter/google/gemini-3.1-pro-preview", help="Model to use as judge")
+def bench_single(model: str, dataset: str, concurrency: int, limit: int | None, use_judge: bool, judge_model: str):
+    """Benchmark a single model performance (Baseline)."""
+    from magi.bench.datasets import get_dataset
+    from magi.bench.runner import run_single_benchmark
+    from magi.bench.report import format_report
+
+    try:
+        questions = get_dataset(dataset)
+        if limit:
+            questions = questions[:limit]
+    except ValueError as e:
+        click.echo(str(e), err=True)
+        sys.exit(1)
+
+    click.echo(f"Running single-model benchmark: {len(questions)} questions")
+    click.echo(f"Model: {model}")
+    if use_judge:
+        click.echo(f"Judge: {judge_model}")
+    click.echo("")
+
+    try:
+        report = asyncio.run(run_single_benchmark(
+            model, questions, concurrency=concurrency,
+            use_judge=use_judge, judge_model=judge_model
+        ))
     except Exception as e:
         click.echo(f"Benchmark failed: {e}", err=True)
         sys.exit(1)

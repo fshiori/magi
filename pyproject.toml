@@ -13,6 +13,8 @@ authors = [{ name = "Eric Chen" }]
 dependencies = [
     "litellm>=1.0.0,!=1.82.7,!=1.82.8",
     "click>=8.0",
+    "datasets>=2.14.0",
+    "pandas>=2.0.0",
 ]
 
 [project.optional-dependencies]

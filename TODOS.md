@@ -29,3 +29,11 @@ OpenAI-compatible HTTP proxy server。任何現有應用只要改 `base_url` 指
 **Priority:** P3
 **Depends on:** 累積足夠 trace 數據（建議 >100 個有 ground truth 的決策）
 **Context:** Codex outside voice 認為是「假精度」，建議等數據充分再啟用。
+
+## Phase 3 (Benchmark & Analytics)
+
+### 評分系統升級
+詳見 [BENCHMARK_UPGRADE.md](./BENCHMARK_UPGRADE.md)。
+- [ ] 整合 MMLU 全量數據。
+- [ ] 引入 LLM-as-a-Judge。
+- [ ] 成本/準確度效益分析。
