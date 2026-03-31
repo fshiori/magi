@@ -8,13 +8,15 @@ MAGI is not another agent framework. It is a **structured disagreement engine**:
 
 ## Why?
 
-> Three cheap models using MAGI critique mode scored **88%** on our benchmark.
-> A single Claude Sonnet 4.6 scored **76%**.
->
-> Vote alone (72%) did not beat the single strong model.
-> **Critique did.** The models caught each other's mistakes.
+> "Three cobblers with their wits combined equal Zhuge Liang, the master mind."
 
-The value is not "more accurate answers." It is **better decision quality**: seeing where models agree, where they disagree, and why.
+In our latest **MMLU (Massive Multitask Language Understanding)** "Hell Mode" benchmark:
+- **Single Strong Model** (Claude 3.5 Sonnet): **66.7%**
+- **MAGI Critique** (3x Cheap Models*): **80.0%** 🏆
+
+*Models: Xiaomi Mimo-v2-pro, MiniMax-m2.7, DeepSeek-v3.2. Note: While individual models are cheaper per token, Critique Mode uses more rounds and context to achieve this higher reliability.*
+
+The value is not just "accuracy." It is **better decision quality**: MAGI's critique mode allows specialized models to catch each other's hallucinations and logic gaps, outperforming a single "God-model" in complex domains like Abstract Algebra and Professional Law.
 
 ## How MAGI Differs
 
@@ -32,12 +34,12 @@ There are several EVA-inspired multi-model projects. Here's what makes this one 
 | **Mind change tracking** | No | Yes |
 | **Adaptive protocol selection** | No | Yes |
 | **Minority report / dissent analysis** | No | Yes |
-| **Benchmark: ensemble > single model** | No | Yes (88% > 76%) |
+| **Benchmark: ensemble > single model** | No | Yes (80% > 66%) |
 | **Fault tolerance (node failures)** | No | Yes |
 | **NERV hexagonal dashboard** | No | Yes |
 | **CLI toolchain (diff, judge, bench)** | No | Yes |
 
-The key finding: **vote alone (72%) does not beat a single strong model (76%)**. Every voting-only project hits this ceiling. MAGI's critique mode breaks through it (88%) by letting models catch each other's mistakes.
+The key finding: **vote alone often hits a logic ceiling**. MAGI's critique mode breaks through it (80% vs 66%) by letting models catch each other's mistakes in high-stakes reasoning tasks.
 
 A NeurIPS 2025 paper ([Debate or Vote](https://arxiv.org/abs/2508.17536)) found that "debate doesn't systematically improve beliefs." But their debate asks models to persuade humans. MAGI's ICE protocol asks models to find errors in each other's reasoning. Different mechanism, different result.
 
@@ -278,23 +280,6 @@ Features:
 In Evangelion, MAGI is a trio of supercomputers created by Dr. Naoko Akagi. Each embodies a different aspect of her personality: **Melchior** (the scientist), **Balthasar** (the mother), and **Casper** (the woman). Decisions are made by majority vote among the three.
 
 MAGI applies this concept to LLMs: same question, three different perspectives, structured disagreement produces better decisions than any single model alone.
-
-## License
-
-MIT
-e.
-
-## License
-
-MIT
-aspect of her personality: **Melchior** (the scientist), **Balthasar** (the mother), and **Casper** (the woman). Decisions are made by majority vote among the three.
-
-MAGI applies this concept to LLMs: same question, three different perspectives, structured disagreement produces better decisions than any single model alone.
-
-## License
-
-MIT
-e.
 
 ## License
 
