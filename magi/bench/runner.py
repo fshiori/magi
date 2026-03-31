@@ -1,6 +1,7 @@
 """Benchmark runner — compares single model vs MAGI on multiple-choice questions."""
 import asyncio
 import time
+import sys
 from dataclasses import dataclass, field
 
 from magi.bench.datasets import BenchQuestion
@@ -155,13 +156,20 @@ async def run_single_benchmark(
                 )
                 judge_opinion = opinion
 
+            # PROGRESS PRINT
+            status = "OK" if is_correct else "WRONG"
+            print(f"  [{status}] — {q.question[:50]}...")
+            if judge_opinion:
+                print(f"    Judge: {judge_opinion}")
+            sys.stdout.flush()
+
             return BenchResult(
                 question=q.question,
                 category=q.category,
                 correct_answer=q.choices[q.correct],
                 magi_answer=answer,
                 magi_correct=is_correct,
-                magi_confidence=1.0,  # Single node has 100% confidence in itself
+                magi_confidence=1.0,
                 magi_protocol="single_node",
                 single_results={model: {"answer": answer, "correct": is_correct, "choice": choice}},
                 latency_ms=elapsed,
@@ -180,10 +188,8 @@ async def run_single_benchmark(
         report.results.append(r)
         if r.magi_correct:
             report.magi_correct += 1
-        # Individual accuracy for the single model
         report.single_correct[model] = report.single_correct.get(model, 0) + (1 if r.magi_correct else 0)
 
-        # Category tracking
         cat = r.category
         if cat not in report.by_category:
             report.by_category[cat] = {"total": 0, "magi_correct": 0, "single": {model: 0}}
@@ -193,19 +199,17 @@ async def run_single_benchmark(
             report.by_category[cat]["single"][model] += 1
 
     return report
-    """Run a benchmark comparing MAGI vs individual models.
 
-    Args:
-        engine: MAGI engine instance.
-        questions: List of benchmark questions.
-        mode: MAGI decision mode.
-        concurrency: Max concurrent questions (to respect rate limits).
-        use_judge: Whether to use an LLM judge for verification.
-        judge_model: The model to use as a judge.
 
-    Returns:
-        BenchReport with accuracy and decision quality metrics.
-    """
+async def run_benchmark(
+    engine: MAGI,
+    questions: list[BenchQuestion],
+    mode: str = "vote",
+    concurrency: int = 3,
+    use_judge: bool = False,
+    judge_model: str = "openrouter/google/gemini-3.1-pro-preview",
+) -> BenchReport:
+    """Run a benchmark comparing MAGI vs individual models."""
     report = BenchReport()
     semaphore = asyncio.Semaphore(concurrency)
 
@@ -237,6 +241,13 @@ async def run_single_benchmark(
                 if is_correct:
                     magi_correct = True
                 judge_opinion = opinion
+
+            # PROGRESS PRINT
+            status = "OK" if magi_correct else "WRONG"
+            print(f"  [{status}] — {q.question[:50]}...")
+            if judge_opinion:
+                print(f"    Judge: {judge_opinion}")
+            sys.stdout.flush()
 
             # Extract individual node answers
             single_results = {}
@@ -310,7 +321,7 @@ async def run_single_benchmark(
 
 
 def _compute_calibration(report: BenchReport) -> None:
-    """Compute confidence calibration: does high confidence = actually correct?"""
+    """Compute confidence calibration."""
     buckets = {
         "0.0-0.2": {"total": 0, "correct": 0},
         "0.2-0.4": {"total": 0, "correct": 0},
@@ -338,13 +349,7 @@ def _compute_calibration(report: BenchReport) -> None:
 
 
 def _compute_disagreement_value(report: BenchReport) -> None:
-    """Compute disagreement value: how often is the minority report right?
-
-    Tracks:
-    - all_agree_wrong: all models agreed but were wrong
-    - dissenter_right: at least one model disagreed AND was correct
-    - all_agree_right: all models agreed and were correct
-    """
+    """Compute disagreement value."""
     stats = {"all_agree_wrong": 0, "dissenter_right": 0, "all_agree_right": 0, "total_disagreements": 0}
 
     for r in report.results:
@@ -360,7 +365,6 @@ def _compute_disagreement_value(report: BenchReport) -> None:
             stats["all_agree_wrong"] += 1
         else:
             stats["total_disagreements"] += 1
-            # At least one disagrees — check if any dissenter was right
             if any(sr["correct"] for sr in r.single_results.values()):
                 stats["dissenter_right"] += 1
 

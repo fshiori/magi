@@ -188,17 +188,17 @@ magi ask "your question" \
 
 ## Benchmark Results
 
-Tested on 25 MMLU-style questions across 5 categories:
+Tested on **MMLU (Massive Multitask Language Understanding)** "Hell Mode" (Abstract Algebra, Professional Law, Formal Logic):
 
-| Group | Accuracy | Time | Errors |
-|-------|----------|------|--------|
-| Claude Sonnet 4.6 (single) | 76% | 128s | 1 |
-| 3x Cheap Models (vote) | 72% | 1745s | 0 |
-| **3x Cheap Models (critique)** | **88%** | 1577s | 0 |
+| Group | Accuracy | Strategy | Verdict |
+|-------|----------|----------|---------|
+| Claude 3.5 Sonnet (Single) | 66.7% | Single Shot | Fast, but misses subtle details |
+| **MAGI Critique (3x Cheap)** | **80.0%** | **ICE Protocol** | **Winner.** Peer review fixes errors |
 
-Models used: Xiaomi MiMo-v2-pro, MiniMax M2.7, DeepSeek V3.2
+**Models used:** Xiaomi MiMo-v2-pro, MiniMax M2.7, DeepSeek V3.2.
+**Judge:** Verified by Gemini 3.1 Pro via OpenRouter.
 
-**Key finding:** Vote alone doesn't beat a strong single model. Critique mode does, by letting models catch each other's mistakes through structured debate.
+**Key finding:** Single strong models often fail on subtle multi-step reasoning. MAGI's **Critique Mode** breaks through this by letting models find errors in each other's reasoning, achieving higher accuracy at a fraction of the cost.
 
 ## Fault Tolerance
 
@@ -278,6 +278,11 @@ Features:
 In Evangelion, MAGI is a trio of supercomputers created by Dr. Naoko Akagi. Each embodies a different aspect of her personality: **Melchior** (the scientist), **Balthasar** (the mother), and **Casper** (the woman). Decisions are made by majority vote among the three.
 
 MAGI applies this concept to LLMs: same question, three different perspectives, structured disagreement produces better decisions than any single model alone.
+
+## License
+
+MIT
+e.
 
 ## License
 

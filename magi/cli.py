@@ -140,12 +140,13 @@ def presets():
 @click.option("--dataset", default="builtin", help="Dataset to benchmark against")
 @click.option("--mode", default="vote", type=click.Choice(["vote", "critique", "adaptive"]))
 @click.option("--concurrency", default=3, help="Max concurrent questions")
+@click.option("--limit", default=None, type=int, help="Limit number of questions")
 @click.option("--use-judge", is_flag=True, help="Use an LLM to verify answers")
 @click.option("--judge-model", default="openrouter/google/gemini-3.1-pro-preview", help="Model to use as judge")
 @click.option("--melchior", default="claude-sonnet-4-6", help="Model for Melchior node")
 @click.option("--balthasar", default="gpt-4o", help="Model for Balthasar node")
 @click.option("--casper", default="gemini/gemini-2.5-pro", help="Model for Casper node")
-def bench(dataset: str, mode: str, concurrency: int, use_judge: bool, judge_model: str, melchior: str, balthasar: str, casper: str):
+def bench(dataset: str, mode: str, concurrency: int, limit: int | None, use_judge: bool, judge_model: str, melchior: str, balthasar: str, casper: str):
     """Run benchmark: MAGI vs individual models on multiple-choice questions."""
     from magi.bench.datasets import get_dataset
     from magi.bench.runner import run_benchmark
@@ -153,6 +154,8 @@ def bench(dataset: str, mode: str, concurrency: int, use_judge: bool, judge_mode
 
     try:
         questions = get_dataset(dataset)
+        if limit:
+            questions = questions[:limit]
     except ValueError as e:
         click.echo(str(e), err=True)
         sys.exit(1)
@@ -180,9 +183,10 @@ def bench(dataset: str, mode: str, concurrency: int, use_judge: bool, judge_mode
 @click.option("--model", required=True, help="Model to evaluate")
 @click.option("--dataset", default="builtin", help="Dataset to benchmark against")
 @click.option("--concurrency", default=5, help="Max concurrent questions")
+@click.option("--limit", default=None, type=int, help="Limit number of questions")
 @click.option("--use-judge", is_flag=True, help="Use an LLM to verify answers")
 @click.option("--judge-model", default="openrouter/google/gemini-3.1-pro-preview", help="Model to use as judge")
-def bench_single(model: str, dataset: str, concurrency: int, use_judge: bool, judge_model: str):
+def bench_single(model: str, dataset: str, concurrency: int, limit: int | None, use_judge: bool, judge_model: str):
     """Benchmark a single model performance (Baseline)."""
     from magi.bench.datasets import get_dataset
     from magi.bench.runner import run_single_benchmark
@@ -190,6 +194,8 @@ def bench_single(model: str, dataset: str, concurrency: int, use_judge: bool, ju
 
     try:
         questions = get_dataset(dataset)
+        if limit:
+            questions = questions[:limit]
     except ValueError as e:
         click.echo(str(e), err=True)
         sys.exit(1)
